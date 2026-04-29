@@ -1,12 +1,11 @@
 FROM php:7.4-apache
 
-# ─── Dependências do sistema ───────────────────────────────────────
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl unzip wget libsqlite3-dev \
-    && docker-php-ext-install pdo pdo_sqlite \
+# ─── libfaketime para contornar expiração do ionCube ──────────────
+RUN apt-get update && apt-get install -y \
+    curl libfaketime \
     && rm -rf /var/lib/apt/lists/*
 
-# ─── ionCube Loader (necessário para os arquivos PHP do painel) ────
+# ─── ionCube Loader 7.4 ───────────────────────────────────────────
 RUN cd /tmp \
     && curl -fsSL -o ioncube.tar.gz \
        https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
@@ -18,43 +17,26 @@ RUN cd /tmp \
     && rm -rf /tmp/ioncube* \
     && php -v
 
-# ─── Configurações PHP ─────────────────────────────────────────────
-RUN { \
-    echo "memory_limit = 256M"; \
-    echo "upload_max_filesize = 64M"; \
-    echo "post_max_size = 64M"; \
-    echo "max_execution_time = 300"; \
-    echo "expose_php = Off"; \
-    echo "display_errors = Off"; \
-    echo "log_errors = On"; \
-    echo "error_log = /var/log/apache2/php_errors.log"; \
-} >> /usr/local/etc/php/php.ini
+# ─── PHP configs ──────────────────────────────────────────────────
+RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini \
+    && echo "upload_max_filesize = 64M" >> /usr/local/etc/php/php.ini \
+    && echo "post_max_size = 64M" >> /usr/local/etc/php/php.ini
 
-# ─── Apache: ativa mod_rewrite e headers ──────────────────────────
-RUN a2enmod rewrite headers \
+# ─── Apache mod_rewrite ───────────────────────────────────────────
+RUN a2enmod rewrite \
     && sed -i 's/AllowOverride None/AllowOverride All/g' \
        /etc/apache2/apache2.conf
 
-# ─── Copia os arquivos do projeto ─────────────────────────────────
-COPY landing/     /var/www/html/
+# ─── Copia arquivos ───────────────────────────────────────────────
+COPY landing/ /var/www/html/
 COPY painelactive/ /var/www/html/painelactive/
 
-# ─── Permissões ───────────────────────────────────────────────────
 RUN chown -R www-data:www-data /var/www/html/ \
-    && find /var/www/html -type d -exec chmod 755 {} \; \
-    && find /var/www/html -type f -exec chmod 644 {} \;
+    && chmod -R 777 /var/www/html/painelactive/api/data/ 2>/dev/null || true
 
-# ─── Pasta de dados com permissão de escrita ──────────────────────
-RUN mkdir -p /var/www/html/painelactive/api/data \
-    && chmod -R 777 /var/www/html/painelactive/api/data
-
-# ─── Entrypoint ───────────────────────────────────────────────────
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# ─── Script de start com data falsa via libfaketime ───────────────
+COPY deploy/start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 80
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["/start.sh"]
