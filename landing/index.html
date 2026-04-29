@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Xplus — Streaming Premium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:    #e50914;
+      --red2:   #ff2d20;
+      --dark:   #0a0a0a;
+      --dark2:  #111111;
+      --dark3:  #1a1a1a;
+      --gray:   #888;
+      --white:  #f5f5f5;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .5;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(229,9,20,.18) 0%, transparent 70%),
+        var(--dark);
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 200px;
+      background: linear-gradient(transparent, var(--dark));
+      pointer-events: none;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 2.5rem;
+      background: linear-gradient(var(--dark), transparent);
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      letter-spacing: .1em;
+      color: var(--white);
+    }
+    .logo span { color: var(--red); }
+
+    .nav-btn {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      padding: .6rem 1.5rem;
+      border-radius: 4px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .nav-btn:hover { background: var(--red2); }
+
+    .badge {
+      display: inline-block;
+      background: rgba(229,9,20,.15);
+      border: 1px solid rgba(229,9,20,.4);
+      color: var(--red2);
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      padding: .35rem .9rem;
+      border-radius: 100px;
+      margin-bottom: 1.8rem;
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 12vw, 9rem);
+      line-height: 1;
+      letter-spacing: .02em;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #fff 40%, #aaa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: #aaa;
+      max-width: 500px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--red);
+      color: #fff;
+      padding: .85rem 2.2rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: transform .2s, background .2s;
+    }
+    .btn-primary:hover { background: var(--red2); transform: translateY(-2px); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      padding: .85rem 2.2rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.15);
+      transition: background .2s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.14); }
+
+    /* ── STATS BAR ── */
+    .stats {
+      position: relative;
+      z-index: 1;
+      background: var(--dark2);
+      border-top: 1px solid rgba(255,255,255,.06);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      flex: 1;
+      min-width: 150px;
+      max-width: 250px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,.06);
+    }
+    .stat:last-child { border-right: none; }
+
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.8rem;
+      color: var(--red);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: .75rem;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-top: .4rem;
+    }
+
+    /* ── FEATURES ── */
+    .section {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+
+    .section-label {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: .8rem;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      line-height: 1.1;
+      margin-bottom: 3.5rem;
+      max-width: 600px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .feature {
+      background: var(--dark2);
+      padding: 2.2rem;
+      transition: background .2s;
+    }
+    .feature:hover { background: var(--dark3); }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(229,9,20,.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .feature h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: .5rem;
+    }
+
+    .feature p {
+      font-size: .875rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    /* ── APPS ── */
+    .apps-row {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 3rem;
+    }
+
+    .app-card {
+      flex: 1;
+      min-width: 260px;
+      background: var(--dark2);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .app-card:hover {
+      border-color: rgba(229,9,20,.5);
+      transform: translateY(-3px);
+    }
+
+    .app-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--red), #7b0000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+    }
+
+    .app-card h3 { font-size: 1.05rem; font-weight: 600; }
+    .app-card p  { font-size: .85rem; color: var(--gray); line-height: 1.6; flex: 1; }
+
+    .app-dl {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(229,9,20,.12);
+      border: 1px solid rgba(229,9,20,.3);
+      color: var(--red2);
+      padding: .55rem 1.2rem;
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .2s;
+      align-self: flex-start;
+    }
+    .app-dl:hover { background: rgba(229,9,20,.25); }
+
+    /* ── PAINEL CTA ── */
+    .cta-block {
+      background: linear-gradient(135deg, rgba(229,9,20,.12), rgba(229,9,20,.04));
+      border: 1px solid rgba(229,9,20,.2);
+      border-radius: 16px;
+      padding: 3.5rem;
+      text-align: center;
+    }
+    .cta-block h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 1rem;
+    }
+    .cta-block p {
+      color: var(--gray);
+      margin-bottom: 2rem;
+      font-size: .95rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding: 2rem;
+      text-align: center;
+      color: var(--gray);
+      font-size: .8rem;
+    }
+    footer strong { color: var(--white); }
+
+    /* ── SCROLL ANIMATION ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">X<span>+</span></div>
+  <a href="/painelactive/" class="nav-btn">Painel Admin</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">⚡ Streaming Premium</div>
+  <h1>XPLUS</h1>
+  <p>Canais ao vivo, filmes e séries com qualidade máxima. Sem limitações. Em qualquer dispositivo.</p>
+  <div class="hero-btns">
+    <a href="/painelactive/" class="btn-primary">Acessar Painel</a>
+    <a href="#apps" class="btn-secondary">Baixar Apps</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">10K+</div>
+    <div class="stat-label">Canais ao Vivo</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">50K+</div>
+    <div class="stat-label">Filmes & Séries</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">4K</div>
+    <div class="stat-label">Qualidade Máxima</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">99%</div>
+    <div class="stat-label">Uptime</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section fade-in">
+  <p class="section-label">Por que Xplus</p>
+  <h2 class="section-title">Tudo que você precisa em um só lugar</h2>
+  <div class="features-grid">
+    <div class="feature">
+      <div class="feature-icon">📺</div>
+      <h3>Canais ao Vivo</h3>
+      <p>Transmissão em tempo real com baixa latência. Esportes, notícias, entretenimento e muito mais.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🎬</div>
+      <h3>VOD Completo</h3>
+      <p>Biblioteca com filmes e séries atualizados. Assista quando e onde quiser.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔑</div>
+      <h3>Painel de Controle</h3>
+      <p>Gerencie ativações, usuários e servidores DNS diretamente pelo painel web.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📱</div>
+      <h3>Multi-plataforma</h3>
+      <p>Apps para Android TV, smartphone e tablet. Compatível com qualquer dispositivo.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <h3>Alta Performance</h3>
+      <p>Servidores otimizados para streaming sem travamentos ou buffering.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🛡️</div>
+      <h3>Seguro e Estável</h3>
+      <p>Sistema de keys com controle de acesso e monitoramento em tempo real.</p>
+    </div>
+  </div>
+</div>
+
+<!-- APPS -->
+<div class="section fade-in" id="apps">
+  <p class="section-label">Aplicativos</p>
+  <h2 class="section-title">Baixe e comece agora</h2>
+  <div class="apps-row">
+    <div class="app-card">
+      <div class="app-icon">📡</div>
+      <h3>Xplus Canais</h3>
+      <p>App para assistir todos os canais ao vivo. Instale, ative sua key e aproveite.</p>
+      <a href="/apps/NemOttCanais.apk" class="app-dl" download>⬇ Baixar APK — Canais</a>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🎥</div>
+      <h3>Xplus VOD</h3>
+      <p>App dedicado para filmes, séries e conteúdo sob demanda em qualidade máxima.</p>
+      <a href="/apps/NemOttVod.apk" class="app-dl" download>⬇ Baixar APK — VOD</a>
+    </div>
+  </div>
+</div>
+
+<!-- CTA PAINEL -->
+<div class="section fade-in">
+  <div class="cta-block">
+    <h2>Pronto para gerenciar?</h2>
+    <p>Acesse o painel administrativo e gerencie seus usuários, keys e servidores.</p>
+    <a href="/painelactive/" class="btn-primary">Entrar no Painel →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p><strong>Xplus</strong> &copy; 2024 — Todos os direitos reservados.</p>
+</footer>
+
+<script>
+  // Scroll fade-in
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

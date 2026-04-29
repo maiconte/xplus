@@ -1,0 +1,14 @@
+# Logs
+*.log
+error_log
+
+# Dados do banco (não commitar dados de usuários)
+painelactive/api/data/*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
