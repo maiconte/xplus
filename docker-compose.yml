@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  xplus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: xplus_app
+    ports:
+      - "8080:80"
+    volumes:
+      # Hot-reload da landing em dev (painelactive usa ionCube, não pode ser volume)
+      - ./landing:/var/www/html:delegated
+      - ./painelactive:/var/www/html/painelactive:delegated
+      # Persistência do banco SQLite
+      - xplus_data:/var/www/html/painelactive/api/data
+    environment:
+      - APACHE_RUN_USER=www-data
+      - APACHE_RUN_GROUP=www-data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  xplus_data:
+    driver: local

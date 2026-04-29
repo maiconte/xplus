@@ -1,14 +1,30 @@
-# Logs
+# ── Logs ──────────────────────────────────────────────────────────
 *.log
 error_log
+php_errors.log
 
-# Dados do banco (não commitar dados de usuários)
+# ── Banco de dados SQLite (dados de produção não versionados) ─────
 painelactive/api/data/*.db
+painelactive/api/data/*.sqlite
 
-# OS
+# ── Uploads e temporários ─────────────────────────────────────────
+uploads/
+tmp/
+*.tmp
+
+# ── Docker ────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── OS ────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Editor
+# ── Editor ────────────────────────────────────────────────────────
 .vscode/
 .idea/
+*.swp
+*.swo
+*~

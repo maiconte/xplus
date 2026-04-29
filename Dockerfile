@@ -1,7 +1,7 @@
 FROM php:7.4-apache
 
 # ─── Dependências do sistema ───────────────────────────────────────
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl unzip wget libsqlite3-dev \
     && docker-php-ext-install pdo pdo_sqlite \
     && rm -rf /var/lib/apt/lists/*
@@ -19,18 +19,24 @@ RUN cd /tmp \
     && php -v
 
 # ─── Configurações PHP ─────────────────────────────────────────────
-RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini \
-    && echo "upload_max_filesize = 64M" >> /usr/local/etc/php/php.ini \
-    && echo "post_max_size = 64M" >> /usr/local/etc/php/php.ini \
-    && echo "max_execution_time = 300" >> /usr/local/etc/php/php.ini
+RUN { \
+    echo "memory_limit = 256M"; \
+    echo "upload_max_filesize = 64M"; \
+    echo "post_max_size = 64M"; \
+    echo "max_execution_time = 300"; \
+    echo "expose_php = Off"; \
+    echo "display_errors = Off"; \
+    echo "log_errors = On"; \
+    echo "error_log = /var/log/apache2/php_errors.log"; \
+} >> /usr/local/etc/php/php.ini
 
-# ─── Apache: ativa mod_rewrite ────────────────────────────────────
-RUN a2enmod rewrite
-RUN sed -i 's/AllowOverride None/AllowOverride All/g' \
-    /etc/apache2/apache2.conf
+# ─── Apache: ativa mod_rewrite e headers ──────────────────────────
+RUN a2enmod rewrite headers \
+    && sed -i 's/AllowOverride None/AllowOverride All/g' \
+       /etc/apache2/apache2.conf
 
 # ─── Copia os arquivos do projeto ─────────────────────────────────
-COPY landing/ /var/www/html/
+COPY landing/     /var/www/html/
 COPY painelactive/ /var/www/html/painelactive/
 
 # ─── Permissões ───────────────────────────────────────────────────
@@ -39,8 +45,16 @@ RUN chown -R www-data:www-data /var/www/html/ \
     && find /var/www/html -type f -exec chmod 644 {} \;
 
 # ─── Pasta de dados com permissão de escrita ──────────────────────
-RUN chmod -R 777 /var/www/html/painelactive/api/data/ 2>/dev/null || true
+RUN mkdir -p /var/www/html/painelactive/api/data \
+    && chmod -R 777 /var/www/html/painelactive/api/data
+
+# ─── Entrypoint ───────────────────────────────────────────────────
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
