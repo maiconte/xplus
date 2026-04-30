@@ -1,7 +1,5 @@
 FROM php:7.4-apache
 
-ARG CACHEBUST=3
-
 RUN apt-get update && apt-get install -y \
     curl libfaketime \
     && rm -rf /var/lib/apt/lists/*
@@ -16,15 +14,24 @@ RUN cd /tmp \
        > /usr/local/etc/php/conf.d/00-ioncube.ini \
     && rm -rf /tmp/ioncube*
 
-RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini \
-    && echo "upload_max_filesize = 64M" >> /usr/local/etc/php/php.ini \
-    && echo "post_max_size = 64M" >> /usr/local/etc/php/php.ini
+RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini
 
-RUN rm -f /etc/apache2/mods-enabled/mpm_event.conf \
-    /etc/apache2/mods-enabled/mpm_event.load \
-    /etc/apache2/mods-enabled/mpm_worker.conf \
-    /etc/apache2/mods-enabled/mpm_worker.load \
-    && a2enmod mpm_prefork rewrite headers \
+# Esvazia os arquivos de MPM indesejados na imagem (não apenas remove symlinks)
+RUN echo "" > /etc/apache2/mods-available/mpm_event.load \
+    && echo "" > /etc/apache2/mods-available/mpm_event.conf \
+    && echo "" > /etc/apache2/mods-available/mpm_worker.load \
+    && echo "" > /etc/apache2/mods-available/mpm_worker.conf \
+    && rm -f /etc/apache2/mods-enabled/mpm_event.conf \
+             /etc/apache2/mods-enabled/mpm_event.load \
+             /etc/apache2/mods-enabled/mpm_worker.conf \
+             /etc/apache2/mods-enabled/mpm_worker.load \
+             /etc/apache2/mods-enabled/mpm_prefork.conf \
+             /etc/apache2/mods-enabled/mpm_prefork.load \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.conf \
+              /etc/apache2/mods-enabled/mpm_prefork.conf \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.load \
+              /etc/apache2/mods-enabled/mpm_prefork.load \
+    && a2enmod rewrite headers \
     && sed -i 's/AllowOverride None/AllowOverride All/g' \
        /etc/apache2/apache2.conf
 
@@ -34,9 +41,5 @@ COPY painelactive/ /var/www/html/painelactive/
 RUN chown -R www-data:www-data /var/www/html/ \
     && chmod -R 777 /var/www/html/painelactive/api/data/ 2>/dev/null || true
 
-COPY deploy/start.sh /start.sh
-RUN chmod +x /start.sh
-
 EXPOSE 80
-ENV PORT=80
-CMD ["/start.sh"]
+CMD ["apache2-foreground"]
