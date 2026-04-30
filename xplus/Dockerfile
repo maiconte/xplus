@@ -16,9 +16,7 @@ RUN cd /tmp \
 
 RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini
 
-RUN rm -f /etc/apache2/mods-enabled/mpm_event.conf \
-    /etc/apache2/mods-enabled/mpm_event.load \
-    && a2enmod mpm_prefork rewrite headers \
+RUN a2enmod rewrite headers \
     && sed -i 's/AllowOverride None/AllowOverride All/g' \
        /etc/apache2/apache2.conf
 
