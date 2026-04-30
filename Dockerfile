@@ -39,4 +39,5 @@ COPY deploy/start.sh /start.sh
 RUN chmod +x /start.sh
 
 EXPOSE 80
+ENV PORT=80
 CMD ["/start.sh"]
