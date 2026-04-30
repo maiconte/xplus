@@ -1,5 +1,7 @@
 FROM php:7.4-apache
 
+ARG CACHEBUST=3
+
 RUN apt-get update && apt-get install -y \
     curl libfaketime \
     && rm -rf /var/lib/apt/lists/*
@@ -18,7 +20,10 @@ RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini \
     && echo "upload_max_filesize = 64M" >> /usr/local/etc/php/php.ini \
     && echo "post_max_size = 64M" >> /usr/local/etc/php/php.ini
 
-RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.conf \
+    /etc/apache2/mods-enabled/mpm_event.load \
+    /etc/apache2/mods-enabled/mpm_worker.conf \
+    /etc/apache2/mods-enabled/mpm_worker.load \
     && a2enmod mpm_prefork rewrite headers \
     && sed -i 's/AllowOverride None/AllowOverride All/g' \
        /etc/apache2/apache2.conf
