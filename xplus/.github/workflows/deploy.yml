@@ -1,0 +1,23 @@
+name: 🚀 Deploy Xplus
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy para Railway
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🔧 Instala Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: 🚀 Deploy no Railway
+        run: railway up --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

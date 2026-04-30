@@ -1,0 +1,40 @@
+<?php //00543
+// SCRIPTS BY BOXBR APKS REBRAND - APK'N PANELS - https://t.me/boxbrapk
+if(!extension_loaded('ionCube Loader')){$__oc=strtolower(substr(php_uname(),0,3));$__ln='ioncube_loader_'.$__oc.'_'.substr(phpversion(),0,3).(($__oc=='win')?'.dll':'.so');if(function_exists('dl')){@dl($__ln);}if(function_exists('_il_exec')){return _il_exec();}$__ln='/ioncube/'.$__ln;$__oid=$__id=realpath(ini_get('extension_dir'));$__here=dirname(__FILE__);if(strlen($__id)>1&&$__id[1]==':'){$__id=str_replace('\\','/',substr($__id,2));$__here=str_replace('\\','/',substr($__here,2));}$__rd=str_repeat('/..',substr_count($__id,'/')).$__here.'/';$__i=strlen($__rd);while($__i--){if($__rd[$__i]=='/'){$__lp=substr($__rd,0,$__i).$__ln;if(file_exists($__oid.$__lp)){$__ln=$__lp;break;}}}if(function_exists('dl')){@dl($__ln);}}else{die('The file '.__FILE__." is corrupted.\n");}if(function_exists('_il_exec')){return _il_exec();}echo("Site error: the ".(php_sapi_name()=='cli'?'ionCube':'<a href="http://www.ioncube.com">ionCube</a>')." PHP Loader needs to be installed. This is a widely used PHP extension for running ionCube protected PHP code, website security and malware blocking.\n\nPlease visit ".(php_sapi_name()=='cli'?'get-loader.ioncube.com':'<a href="http://get-loader.ioncube.com">get-loader.ioncube.com</a>')." for install assistance.\n\n");exit(199);
+?>
+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
