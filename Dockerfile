@@ -23,9 +23,8 @@ RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini \
     && echo "post_max_size = 64M" >> /usr/local/etc/php/php.ini
 
 # ─── Apache mod_rewrite ───────────────────────────────────────────
-RUN a2enmod rewrite \
-    && sed -i 's/AllowOverride None/AllowOverride All/g' \
-       /etc/apache2/apache2.conf
+RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && a2enmod mpm_prefork rewrite headers \
 
 # ─── Copia arquivos ───────────────────────────────────────────────
 COPY landing/ /var/www/html/
