@@ -1,20 +1,10 @@
 #!/bin/bash
 
-echo "=== MPM files found ==="
-ls /etc/apache2/mods-enabled/mpm* 2>/dev/null || echo "nenhum encontrado"
+# Railway usa $PORT dinamicamente
+PORT="${PORT:-80}"
 
-echo "=== Removendo todos MPMs ==="
-rm -f /etc/apache2/mods-enabled/mpm_*
+# Atualiza Apache para escutar na porta correta
+sed -i "s/Listen 80/Listen $PORT/" /etc/apache2/ports.conf
+sed -i "s/:80>/:$PORT>/" /etc/apache2/sites-enabled/000-default.conf
 
-echo "=== Criando apenas prefork ==="
-ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf
-ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load
-
-echo "=== MPM após fix ==="
-ls /etc/apache2/mods-enabled/mpm* 2>/dev/null
-
-echo "=== Testando config Apache ==="
-apache2ctl -t 2>&1 || true
-
-echo "=== Subindo Apache ==="
 exec apache2-foreground
